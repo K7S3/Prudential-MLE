@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from typing import Tuple
+from rules_engine import prepare_data
 
 def load_data(file_path: str) -> pd.DataFrame:
     """
@@ -108,9 +109,8 @@ def process_data(input_file: str, output_file: str) -> None:
     """
     df = load_data(input_file)
     df = preprocess_data(df)
-    df = remove_duplicates(df)
-    df = drop_columns(df, ['AppID', 'Issue_Date'])
-
+    
+    # Apply SMOTE if target column is present
     if 'target' in df.columns:
         X = df.drop('target', axis=1)
         y = df['target']
@@ -119,7 +119,10 @@ def process_data(input_file: str, output_file: str) -> None:
     else:
         df_resampled = df
 
+    df_resampled = prepare_data(df_resampled)
+    # df_resampled = drop_columns(df_resampled, ['AppID', 'IssueDate'])
+    
     df_resampled.to_csv(output_file, index=False)
 
-
+process_data('../data/raw/Dummy-Data.csv', '../data/processed/Dummy-Data.csv')
 process_data('../data/raw/data-1000.csv', '../data/processed/data-1000.csv')

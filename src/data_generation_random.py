@@ -38,7 +38,7 @@ def generate_data_random(num_samples: int) -> pd.DataFrame:
         'Ins_Gender': gender,
         'Ht': height,
         'Wt': weight,
-        'Issue_Date': issue_date
+        'IssueDate': issue_date
     })
 
     return df
@@ -48,6 +48,6 @@ num_samples = 1000
 
 df = generate_data_random(num_samples)
 
-directory = 'data/raw/'
+directory = '../data/raw/'
 
 df.to_csv(f'{directory}data-{num_samples}.csv', index=False)

@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import KFold, cross_val_score
-from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import cross_val_score, KFold
 
-def linear_regression_kfold(data: pd.DataFrame, target: str, k: int = 5) -> LinearRegression:
+def decision_tree_regression(data: pd.DataFrame, target: str, k: int = 5) -> DecisionTreeRegressor:
     """
-    Performs linear regression with k-fold cross-validation.
+    Performs decision tree regression with k-fold cross-validation.
 
     Args:
         data (pd.DataFrame): The dataset.
@@ -16,9 +16,9 @@ def linear_regression_kfold(data: pd.DataFrame, target: str, k: int = 5) -> Line
     X = data.drop(columns=[target])
     y = data[target]
     
-    kf = KFold(n_splits=k, shuffle=True, random_state=1)
+    model = DecisionTreeRegressor(random_state=1)
     
-    model = LinearRegression()
+    kf = KFold(n_splits=k, shuffle=True, random_state=1)
     
     mse_scores = -cross_val_score(model, X, y, cv=kf, scoring='neg_mean_squared_error')
     rmse_scores = np.sqrt(mse_scores)
@@ -31,12 +31,12 @@ def linear_regression_kfold(data: pd.DataFrame, target: str, k: int = 5) -> Line
     
     return model
 
-def inference(model: LinearRegression, test_data: pd.DataFrame, target: str) -> None:
+def inference(model: DecisionTreeRegressor, test_data: pd.DataFrame, target: str) -> None:
     """
     Make predictions on the test data and evaluate them.
 
     Args:
-        model (LinearRegression): The trained model.
+        model (DecisionTreeRegressor): The trained model.
         test_data (pd.DataFrame): The test data.
         target (str): The target variable for regression.
     """
@@ -57,16 +57,17 @@ def main():
     target_variable = 'BMI'
 
     # Train the model
-    model = linear_regression_kfold(train_data, target_variable, k=10)
+    model = decision_tree_regression(train_data, target_variable)
     
     # Load the test data
     test_data = pd.read_csv('../data/processed/data-1000.csv')
     test_data = test_data.drop(columns=['AppID', 'IssueDate', 'Quote', 'Reason'])
+    
     # Conduct inference
     y_pred = inference(model, test_data, target_variable)
-    # Save predictions to CSV
-    pd.DataFrame(y_pred, columns=['Predicted']).to_csv('../data/predicted/lr-data-1000.csv', index=False)
 
+    # Save predictions to CSV
+    pd.DataFrame(y_pred, columns=['Predicted']).to_csv('../data/predicted/dt-data-1000.csv', index=False)
 
 if __name__ == "__main__":
     main()
