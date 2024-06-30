@@ -3,6 +3,8 @@ import numpy as np
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
+from joblib import dump
+import os
 
 def linear_regression_kfold(data: pd.DataFrame, target: str, k: int = 5) -> LinearRegression:
     """
@@ -59,6 +61,9 @@ def main():
     # Train the model
     model = linear_regression_kfold(train_data, target_variable, k=10)
     
+    
+    dump(model, 'models/checkpoints/linear_regression_model.pkl')
+
     # Load the test data
     test_data = pd.read_csv('../data/processed/data-1000.csv')
     test_data = test_data.drop(columns=['AppID', 'IssueDate', 'Quote', 'Reason'])
