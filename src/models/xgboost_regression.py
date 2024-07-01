@@ -1,17 +1,15 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import KFold, cross_val_score
-from sklearn.linear_model import LinearRegression
+from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error, r2_score
-from joblib import dump
-from evaluate_model import evaluate_fairness
+from sklearn.model_selection import cross_val_score, KFold
 
 
-def linear_regression_kfold(
+def xgboost_regression(
     data: pd.DataFrame, target: str, k: int = 5
-) -> LinearRegression:
+) -> XGBRegressor:
     """
-    Performs linear regression with k-fold cross-validation.
+    Performs XGBoost regression with k-fold cross-validation.
 
     Args:
         data (pd.DataFrame): The dataset.
@@ -21,9 +19,9 @@ def linear_regression_kfold(
     X = data.drop(columns=[target])
     y = data[target]
 
-    kf = KFold(n_splits=k, shuffle=True, random_state=1)
+    model = XGBRegressor(random_state=1)
 
-    model = LinearRegression()
+    kf = KFold(n_splits=k, shuffle=True, random_state=1)
 
     mse_scores = -cross_val_score(model, X, y, cv=kf, scoring="neg_mean_squared_error")
     rmse_scores = np.sqrt(mse_scores)
@@ -37,12 +35,14 @@ def linear_regression_kfold(
     return model
 
 
-def inference(model: LinearRegression, test_data: pd.DataFrame, target: str) -> None:
+def inference(
+    model: XGBRegressor, test_data: pd.DataFrame, target: str
+) -> None:
     """
     Make predictions on the test data and evaluate them.
 
     Args:
-        model (LinearRegression): The trained model.
+        model (XGBRegressor): The trained model.
         test_data (pd.DataFrame): The test data.
         target (str): The target variable for regression.
     """
@@ -64,26 +64,19 @@ def main():
     target_variable = "BMI"
 
     # Train the model
-    model = linear_regression_kfold(train_data, target_variable, k=10)
-
-    dump(model, "models/checkpoints/linear_regression_model.pkl")
+    model = xgboost_regression(train_data, target_variable)
 
     # Load the test data
     test_data = pd.read_csv("../data/processed/data-1000.csv")
     test_data = test_data.drop(columns=["AppID", "IssueDate", "Quote", "Reason"])
+
     # Conduct inference
     y_pred = inference(model, test_data, target_variable)
+
     # Save predictions to CSV
     pd.DataFrame(y_pred, columns=["Predicted"]).to_csv(
-        "../data/predicted/lr-data-1000.csv", index=False
+        "../data/predicted/xgb-data-1000.csv", index=False
     )
-
-    X = train_data.drop(columns=[target_variable])
-    y = train_data[target_variable]
-    protected_attribute = train_data['Ins_Gender']
-
-    fairness_metrics = evaluate_fairness(X, y, protected_attribute, model)
-    print(fairness_metrics)
 
 
 if __name__ == "__main__":

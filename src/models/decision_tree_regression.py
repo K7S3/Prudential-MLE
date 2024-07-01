@@ -59,7 +59,7 @@ def inference(
 
 def main():
     # Load the training data
-    train_data = pd.read_csv("../data/processed/data-1000.csv")
+    train_data = pd.read_csv("../data/processed/data-10000.csv")
     train_data = train_data.drop(columns=["AppID", "IssueDate", "Quote", "Reason"])
     target_variable = "BMI"
 

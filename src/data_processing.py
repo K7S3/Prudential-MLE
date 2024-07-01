@@ -163,3 +163,4 @@ def process_data(input_file: str, output_file: str) -> None:
 
 process_data("../data/raw/Dummy-Data.csv", "../data/processed/Dummy-Data.csv")
 process_data("../data/raw/data-1000.csv", "../data/processed/data-1000.csv")
+process_data("../data/raw/data-10000.csv", "../data/processed/data-10000.csv")

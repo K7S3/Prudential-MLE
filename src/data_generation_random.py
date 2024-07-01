@@ -27,7 +27,7 @@ def generate_data_random(num_samples: int) -> pd.DataFrame:
     gender = np.random.choice(["Male", "Female"], num_samples)
 
     issue_date = pd.date_range(start="1/1/2010", end="12/31/2023").to_series()
-    issue_date = issue_date.sample(num_samples).dt.date
+    issue_date = issue_date.sample(num_samples, replace=True).dt.date
 
     app_id = np.random.randint(10000, 1000000, num_samples)
 
@@ -45,7 +45,7 @@ def generate_data_random(num_samples: int) -> pd.DataFrame:
     return df
 
 
-num_samples = 1000
+num_samples = 10000
 
 df = generate_data_random(num_samples)
 
