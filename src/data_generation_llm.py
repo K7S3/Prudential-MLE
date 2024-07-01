@@ -4,6 +4,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from typing import List
 
+
 class TabularDataGenerator:
     """
     A class to generate synthetic tabular data using a language model.
@@ -15,7 +16,7 @@ class TabularDataGenerator:
         model (AutoModelForCausalLM): The language model for data generation.
     """
 
-    def __init__(self, model_name: str, device: str = 'cpu', use_fp16: bool = False):
+    def __init__(self, model_name: str, device: str = "cpu", use_fp16: bool = False):
         """
         Initializes the TabularDataGenerator with the specified model.
 
@@ -45,7 +46,9 @@ class TabularDataGenerator:
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
         return inputs
 
-    def generate_data(self, prompt: str, num_samples: int, max_length: int = 1024) -> List[str]:
+    def generate_data(
+        self, prompt: str, num_samples: int, max_length: int = 1024
+    ) -> List[str]:
         """
         Generates synthetic data based on the prompt.
 
@@ -61,13 +64,15 @@ class TabularDataGenerator:
         generated_data = []
         while len(generated_data) < num_samples:
             outputs = self.model.generate(
-                inputs['input_ids'], 
-                max_length=min(max_length, 1024), 
-                num_return_sequences=1, 
-                do_sample=True, 
-                temperature=0.7
+                inputs["input_ids"],
+                max_length=min(max_length, 1024),
+                num_return_sequences=1,
+                do_sample=True,
+                temperature=0.7,
             )
-            generated_lines = self.tokenizer.decode(outputs[0], skip_special_tokens=True).split('\n')
+            generated_lines = self.tokenizer.decode(
+                outputs[0], skip_special_tokens=True
+            ).split("\n")
             generated_data.extend(generated_lines)
         return generated_data[:num_samples]
 
@@ -81,17 +86,20 @@ class TabularDataGenerator:
         Returns:
             pd.DataFrame: The DataFrame containing the generated data.
         """
-        rows = [row.split(',') for row in generated_data]
+        rows = [row.split(",") for row in generated_data]
         return pd.DataFrame(rows)
+
 
 def main():
     """
     The main function to generate synthetic tabular data and save it to a CSV file.
     """
     model_name = "gpt2"
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     use_fp16 = torch.cuda.is_available()
-    generator = TabularDataGenerator(model_name=model_name, device=device, use_fp16=use_fp16)
+    generator = TabularDataGenerator(
+        model_name=model_name, device=device, use_fp16=use_fp16
+    )
 
     prompt = """
     Continue generating synthetic applicant information in the following format. Make sure the data is realistic, fair and unbiased.:
@@ -117,9 +125,10 @@ def main():
     generated_data = generator.generate_data(prompt, num_samples)
     df = generator.postprocess_output(generated_data)
 
-    output_path = f'generated_data_{num_samples}.csv'
+    output_path = f"generated_data_{num_samples}.csv"
     df.to_csv(output_path, index=False)
     print(f"Synthetic data generation complete. Data saved to {output_path}")
+
 
 if __name__ == "__main__":
     main()

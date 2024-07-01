@@ -3,6 +3,7 @@ from aiohttp import ClientError
 import boto3
 import os
 
+
 def upload_to_s3(bucket_name: str, file_name: str, object_name: str = None):
     """
     Upload a file to an S3 bucket
@@ -17,7 +18,7 @@ def upload_to_s3(bucket_name: str, file_name: str, object_name: str = None):
         object_name = file_name
 
     # Upload the file
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client("s3")
     try:
         response = s3_client.upload_file(file_name, bucket_name, object_name)
     except ClientError as e:
@@ -27,9 +28,9 @@ def upload_to_s3(bucket_name: str, file_name: str, object_name: str = None):
 
 
 def main():
-    bucket_name = 'bmi-predictor-models'
+    bucket_name = "bmi-predictor-models"
 
-    directory_name = 'checkpoints'
+    directory_name = "checkpoints"
 
     # List all files in the directory
     files = os.listdir(directory_name)
@@ -38,6 +39,7 @@ def main():
     for file_name in files:
         file_path = os.path.join(directory_name, file_name)
         upload_to_s3(bucket_name, file_path)
+
 
 if __name__ == "__main__":
     main()
